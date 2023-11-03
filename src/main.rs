@@ -1,4 +1,5 @@
-use embedded_hal::blocking::delay::DelayMs;
+use anyhow::Ok;
+use embedded_hal::delay::DelayUs;
 use hal::{Delay, I2cdev, i2cdev::linux::LinuxI2CError};
 use linux_embedded_hal as hal;
 
@@ -34,7 +35,7 @@ pub struct Options {
 }
 
 
-fn main() -> Result<(), Error<LinuxI2CError>> {
+fn main() {
 
     // Load options
     let opts = Options::from_args();
@@ -46,59 +47,60 @@ fn main() -> Result<(), Error<LinuxI2CError>> {
         simplelog::ColorChoice::Auto).unwrap();
 
     debug!("Connecting to I2C device");
-    let i2c = match I2cdev::new(&opts.i2c) {
-        Ok(v) => v,
-        Err(e) => {
-            error!("Error opening I2C device '{}': {:?}", &opts.i2c, e);
-            std::process::exit(-1);
-        }
-    };
+    // let i2c = match I2cdev::new(&opts.i2c) {
+    //     Ok(v) => v,
+    //     Err(e) => {
+    //         error!("Error opening I2C device '{}': {:?}", &opts.i2c, e);
+    //         std::process::exit(-1);
+    //     }
+    // };
 
-    debug!("Connecting to sensor");
-    let mut sensor = Scd4x::new(i2c, Delay);
+    // debug!("Connecting to sensor");
+    // let mut sensor = Scd4x::new(i2c, Delay);
 
 
-    debug!("Initalising sensor");
+    // debug!("Initalising sensor");
 
-    sensor.wake_up();
-    sensor.stop_periodic_measurement()?;
-    sensor.reinit()?;
+    // sensor.wake_up();
+    // sensor.stop_periodic_measurement()?;
+    // sensor.reinit()?;
 
-    let serial = sensor.serial_number()?;
-    info!("Serial: {:#04x}", serial);
+    // let serial = sensor.serial_number()?;
+    // info!("Serial: {:#04x}", serial);
 
-    debug!("Starting periodic measurement");
-    sensor.start_periodic_measurement()?;
+    // debug!("Starting periodic measurement");
+    // sensor.start_periodic_measurement()?;
 
-    debug!("Waiting for first measurement... (5 sec)");
+    // debug!("Waiting for first measurement... (5 sec)");
 
-    loop {
-        hal::Delay.delay_ms(5000u16);
+    // loop {
+    //     hal::Delay.delay_ms(5000u16);
 
-        debug!("Waiting for data ready");
-        loop {
-            match sensor.data_ready_status() {
-                Ok(true) => break,
-                Ok(false) => std::thread::sleep(*opts.poll_delay),
-                Err(e) => {
-                    error!("Failed to poll for data ready: {:?}", e);
-                    std::process::exit(-2);
-                },
-            }
-        }
+    //     debug!("Waiting for data ready");
+    //     loop {
+    //         match sensor.data_ready_status() {
+    //             Ok(true) => break,
+    //             Ok(false) => std::thread::sleep(*opts.poll_delay),
+    //             Err(e) => {
+    //                 error!("Failed to poll for data ready: {:?}", e);
+    //                 std::process::exit(-2);
+    //             },
+    //         }
+    //     }
 
-        debug!("Reading sensor data");
-        let data = match sensor.measurement() {
-            Ok(v) => v,
-            Err(e) => {
-                error!("Failed to read measurement: {:?}", e);
-                std::process::exit(-3);
-            },
-        };
+    //     debug!("Reading sensor data");
+    //     let data = match sensor.measurement() {
+    //         Ok(v) => v,
+    //         Err(e) => {
+    //             error!("Failed to read measurement: {:?}", e);
+    //             std::process::exit(-3);
+    //         },
+    //     };
 
-        println!(
-            "CO2: {0}, Temperature: {1:#.2} °C, Humidity: {2:#.2} RH",
-            data.co2, data.temperature, data.humidity
-        );
-    }
+    //     println!(
+    //         "CO2: {0}, Temperature: {1:#.2} °C, Humidity: {2:#.2} RH",
+    //         data.co2, data.temperature, data.humidity
+    //     );
+    // }
+    // Ok(())
 }
